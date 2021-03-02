@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        {{>head}}
+        <script src="/js/app.js"></script>
+
+    </head>
+    <body>
+        {{>header}}
+        <button onclick="checkIn()">Check In</button>
+        <button onclick="answer(calls[0])">Answer</button>
+        {{>footer}}
+
+        <script src="/socket.io/socket.io.js"></script>
+        <script type="text/javascript" src="/js/twilio.min.js"></script>
+        <script type="text/javascript" src="/js/axios.min.js"></script>
+        
+        <script>
+            let calls = [];
+
+            axios.get('/voice/token')
+            .then((resp)=>{
+                Twilio.Device.setup(resp.data.token);
+            })
+
+
+            const socket = io();
+            socket.on('callComing',(data)=>{
+                console.log(data);
+                calls.push(data);
+            })
+
+            Twilio.Device.on('incoming',(conn)=>{
+                console.log('Incoming connection from ' + conn.parameters.From);
+                conn.accept();
+            })
+
+            function answer(call) {
+                Twilio.Device.audioContext.resume();
+                axios.post('/voice/answer',{id:call.data.CallSid});
+
+                //Twilio.Device.connect({conference:call.conference});
+            }
+        </script>
+
+
+
+    </body>
+
+</html>
