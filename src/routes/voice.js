@@ -1,6 +1,5 @@
 const express = require("express");
 const chalk = require('chalk');
-const bodyParser = require('body-parser');
 
 
 // twilio libraries
