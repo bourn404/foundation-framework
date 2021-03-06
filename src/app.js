@@ -17,8 +17,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 // Define paths for Express config
 const publicDirectoryPath = path.join(__dirname, '../public');
-const viewsPath = path.join(__dirname, '../templates/views');
-const partialsPath = path.join(__dirname, '../templates/partials');
+const viewsPath = path.join(__dirname, './views');
+const partialsPath = path.join(__dirname, './views/partials');
 
 // Setup handlebars engine and views location
 app.set('view engine', 'hbs');
@@ -26,8 +26,8 @@ app.set('views', viewsPath);
 hbs.registerPartials(partialsPath);
 
 // Routes 
-const voice = require('./routes/voice');
-app.use("/voice", voice(io));
+const voiceRoutes = require('./routes/voiceRoutes');
+app.use("/voice", voiceRoutes(io));
 
 // Start Server
 server.listen(3000, () => {
@@ -49,10 +49,10 @@ app.use(express.static(publicDirectoryPath));
 
 // Make client sdks available to frontend
 app.use('/js/twilio.min.js', (req, res) => {
-    res.sendFile(path.join(__dirname, '../node_modules/twilio-client/dist/twilio.min.js'));
+    res.sendFile(path.join(__dirname, './node_modules/twilio-client/dist/twilio.min.js'));
 })
 app.use('/js/axios.min.js', (req, res) => {
-    res.sendFile(path.join(__dirname, '../node_modules/axios/dist/axios.min.js'));
+    res.sendFile(path.join(__dirname, './node_modules/axios/dist/axios.min.js'));
 })
 
 app.get('', (req, res) => {
