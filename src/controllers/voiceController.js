@@ -1,5 +1,3 @@
-const chalk = require('chalk');
-
 // twilio libraries
 const twilio = require('twilio')(process.env.accountSid, process.env.authToken);
 const VoiceResponse = require('twilio').twiml.VoiceResponse;
@@ -11,8 +9,8 @@ const VoiceGrant = AccessToken.VoiceGrant;
 module.exports = function(io) {
 
     const handleIncomingCalls = (req, res) => {
-        // console.log(req);
-        console.log(chalk.yellow(req.body.Direction + ' call from ' + req.body.From + ' status: ' + req.body.CallStatus));
+        // TODO: Someday, you'll want to check the 'to' phone number to determine the right organization to route the call to.
+        // console.log(chalk.yellow(req.body.Direction + ' call from ' + req.body.From + ' status: ' + req.body.CallStatus));
         const twiml = new VoiceResponse();
         io.emit('callComing', { data: req.body });
         twiml.pause({ length: 15 }); // give our representatives a chance to pick up
@@ -24,7 +22,7 @@ module.exports = function(io) {
     }
 
     const callStatusChange = (req, res) => {
-        console.log(req.body);
+        // console.log(req.body);
     }
 
     const endCall = (req, res) => {

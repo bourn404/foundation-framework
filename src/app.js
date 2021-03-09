@@ -1,72 +1,55 @@
 require('dotenv').config();
 const path = require('path');
 const express = require('express');
-const chalk = require('chalk');
 const hbs = require('hbs');
 const axios = require('axios');
-const bodyParser = require('body-parser');
+const { logger, requestLogger, stream } = require('./logger');
+const morgan = require('morgan');
 
 // Configure Server
+logger.log({ level: 'debug', message: 'Setting up server.' });
 const app = express();
+const port = process.env.PORT || 3000;
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 
+// Access log
+app.use(morgan("combined", { "stream": stream }));
+
 // Parse request bodies
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 
 // Define paths for Express config
 const publicDirectoryPath = path.join(__dirname, '../public');
 const viewsPath = path.join(__dirname, './views');
 const partialsPath = path.join(__dirname, './views/partials');
 
+// Define static content directory
+app.use(express.static(publicDirectoryPath));
+
 // Setup handlebars engine and views location
+logger.log({ level: 'debug', message: 'Setting up view engine.' });
 app.set('view engine', 'hbs');
 app.set('views', viewsPath);
 hbs.registerPartials(partialsPath);
 
 // Routes 
+logger.log({ level: 'debug', message: 'Setting up routes.' });
 const voiceRoutes = require('./routes/voiceRoutes');
 app.use("/voice", voiceRoutes(io));
+const publicRoutes = require('./routes/publicRoutes');
+app.use("/", publicRoutes(io, app));
 
 // Start Server
-server.listen(3000, () => {
-    console.log(chalk.bold.blue('Server is up on port 3000.'));
+server.listen(port, () => {
+    logger.log({ level: 'info', message: 'Server is running on port ' + port + '.' });
 });
 
 // Socket.io Connections
 io.on('connection', (client) => {
-    console.log(chalk.green('Client connected on port 3000'));
+    logger.log({ level: 'http', message: 'Socket connection on port ' + port + '.' });
 });
 
 const appName = 'Foundation Framework';
 const author = 'Carson Fairbourn';
-
-
-
-// Define static content directory
-app.use(express.static(publicDirectoryPath));
-
-// Make client sdks available to frontend
-app.use('/js/twilio.min.js', (req, res) => {
-    res.sendFile(path.join(__dirname, './node_modules/twilio-client/dist/twilio.min.js'));
-})
-app.use('/js/axios.min.js', (req, res) => {
-    res.sendFile(path.join(__dirname, './node_modules/axios/dist/axios.min.js'));
-})
-
-app.get('', (req, res) => {
-    res.render('index', {
-        appName,
-        author,
-        pageTitle: 'Home',
-    });
-})
-
-app.get('*', (req, res) => {
-    res.status(404).render('404', {
-        appName,
-        author,
-        pageTitle: 'Error 404: Page Not Found'
-    });
-})
