@@ -1,7 +1,7 @@
 // twilio libraries
 require('dotenv').config();
 
-const twilio = require('twilio')(process.env.accountSid, process.env.authToken);
+const twilio = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 const VoiceResponse = require('twilio').twiml.VoiceResponse;
 const AccessToken = require('twilio').jwt.AccessToken;
 const VoiceGrant = AccessToken.VoiceGrant;
@@ -18,7 +18,7 @@ module.exports = function(io) {
         twiml.pause({ length: 15 }); // give our representatives a chance to pick up
         twiml.say({ voice: 'man' }, 'Thanks for calling Foundation Framework.  After the tone, please leave your name and a brief message. We\'ll call you back as soon as possible.');
         twiml.pause({ length: 1 });
-        twiml.record({ timeout: 5, transcribe: true, playBeep: true, action: process.env.siteRoot + '/voice/end' });
+        twiml.record({ timeout: 5, transcribe: true, playBeep: true, action: process.env.SITE_ROOT + '/voice/end' });
         twiml.hangup();
         res.send(twiml.toString());
     }
@@ -36,7 +36,7 @@ module.exports = function(io) {
     const clientAnswerCall = (req, res) => {
         twilio.calls(req.body.id)
             .update({
-                url: process.env.siteRoot + '/voice/route', // TODO: Add a post parameter that specifies which 'agent' answered the call
+                url: process.env.SITE_ROOT + '/voice/route', // TODO: Add a post parameter that specifies which 'agent' answered the call
                 method: 'POST'
             }, (err, call) => {
                 if (err) {
@@ -56,14 +56,14 @@ module.exports = function(io) {
         const identity = 'agent'; // TODO: Make this dynamic depending on who is logged in
 
         const voiceGrant = new VoiceGrant({
-            outgoingApplicationSid: process.env.applicationSid,
+            outgoingTWILIO_APP_SID: process.env.TWILIO_APP_SID,
             incomingAllow: true,
         })
 
         const token = new AccessToken(
-            process.env.accountSid,
-            process.env.apiSid,
-            process.env.apiSecret, { identity: identity }
+            process.env.TWILIO_ACCOUNT_SID,
+            process.env.TWILIO_APP_API_SID,
+            process.env.TWILIO_APP_API_SECRET, { identity: identity }
         );
         token.addGrant(voiceGrant);
         token.identity = identity;
