@@ -1,7 +1,6 @@
 const path = require('path');
 const { createLogger, format, transports } = require('winston');
 const { combine, timestamp, printf } = format;
-const expressWinston = require('express-winston');
 
 const logsDirectory = path.join(__dirname, '../logs');
 

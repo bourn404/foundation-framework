@@ -2,8 +2,7 @@ require('dotenv').config();
 const path = require('path');
 const express = require('express');
 const hbs = require('hbs');
-const axios = require('axios');
-const { logger, requestLogger, stream } = require('./logger');
+const { logger, stream } = require('./logger');
 const morgan = require('morgan');
 
 // Configure Server
@@ -20,12 +19,10 @@ app.use(morgan("combined", { "stream": stream }));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-// Define paths for Express config
+// Paths for Express config
 const publicDirectoryPath = path.join(__dirname, '../public');
 const viewsPath = path.join(__dirname, './views');
 const partialsPath = path.join(__dirname, './views/partials');
-
-// Define static content directory
 app.use(express.static(publicDirectoryPath));
 
 // Setup handlebars engine and views location
@@ -37,8 +34,8 @@ hbs.registerPartials(partialsPath);
 // Routes 
 logger.log({ level: 'debug', message: 'Setting up routes.' });
 const voiceRoutes = require('./routes/voiceRoutes');
-app.use("/voice", voiceRoutes(io));
 const publicRoutes = require('./routes/publicRoutes');
+app.use("/voice", voiceRoutes(io));
 app.use("/", publicRoutes(io, app));
 
 // Start Server
@@ -50,6 +47,3 @@ server.listen(port, () => {
 io.on('connection', (client) => {
     logger.log({ level: 'http', message: 'Socket connection on port ' + port + '.' });
 });
-
-const appName = 'Foundation Framework';
-const author = 'Carson Fairbourn';
