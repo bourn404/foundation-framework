@@ -1,6 +1,7 @@
 const { logger } = require('../logger');
 const Users = require('../models/Users');
 
+
 module.exports = function(io) {
 
     const appName = "Foundation Framework";
@@ -8,10 +9,12 @@ module.exports = function(io) {
 
     const getPublicHomepage = (req, res) => {
 
-        Users.getUsers((err, res) => {
-            if (err) return console.log(err);
-            console.log(res);
-        });
+        // Users.getUsers((err, res) => {
+        //     if (err) return console.log(err);
+        //     console.log(res);
+        // });
+
+
 
         res.render('index', {
             appName,

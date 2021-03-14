@@ -3,6 +3,8 @@ const twilio = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWI
 const VoiceResponse = require('twilio').twiml.VoiceResponse;
 const AccessToken = require('twilio').jwt.AccessToken;
 const VoiceGrant = AccessToken.VoiceGrant;
+const { logger } = require('../logger');
+const Calls = require('../models/Calls');
 
 // require models
 
@@ -10,11 +12,17 @@ module.exports = function(io) {
 
     const handleIncomingCalls = (req, res) => {
         // TODO: Someday, you'll want to check the 'to' phone number to determine the right organization to route the call to.
-        // console.log(chalk.yellow(req.body.Direction + ' call from ' + req.body.From + ' status: ' + req.body.CallStatus));
+        logger.log({level:'debug',message:req.body.Direction + ' call from ' + req.body.From + ' status: ' + req.body.CallStatus})
         const twiml = new VoiceResponse();
         io.emit('callComing', { data: req.body });
-        twiml.pause({ length: 15 }); // give our representatives a chance to pick up
-        twiml.say({ voice: 'man' }, 'Thanks for calling Foundation Framework.  After the tone, please leave your name and a brief message. We\'ll call you back as soon as possible.');
+        callData = [req.body.CallSid,req.body.From,null,req.body.To,null,0,null];
+        Calls.addCall(callData,(err,res) => {
+            if (err) return console.log(err);
+            // console.log(res);
+        })
+        twiml.say({ voice: 'man' }, 'Please hold while we connect your call.');
+        twiml.play({ },'http://com.twilio.sounds.music.s3.amazonaws.com/MARKOVICHAMP-Borghestral.mp3'); // give our representatives a chance to pick up
+        twiml.say({ voice: 'man' }, 'No representatives are available.  After the tone, please leave your name and a brief message. We\'ll call you back as soon as possible.');
         twiml.pause({ length: 1 });
         twiml.record({ timeout: 5, transcribe: true, playBeep: true, action: process.env.SITE_ROOT + '/voice/end' });
         twiml.hangup();
@@ -38,7 +46,7 @@ module.exports = function(io) {
                 method: 'POST'
             }, (err, call) => {
                 if (err) {
-                    console.log(chalk.red(err));
+                    logger.log({level:'error',message:err})
                 }
             });
     }

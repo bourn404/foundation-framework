@@ -7,8 +7,11 @@
     </head>
     <body>
         {{>header}}
-        <button onclick="checkIn()">Check In</button>
-        <button onclick="answer(calls[0])">Answer</button>
+        <div id="actions">
+            <p>Click "Check In" to begin receiving calls.</p>
+            <button onclick="checkIn()">Check In</button>
+        </div>
+        <!-- <button onclick="answer(calls[0])">Answer</button> -->
         {{>footer}}
 
         <script src="/socket.io/socket.io.js"></script>
@@ -18,16 +21,13 @@
         <script>
             let calls = [];
 
-            axios.get('/voice/token')
-            .then((resp)=>{
-                Twilio.Device.setup(resp.data.token);
-            })
-
-
             const socket = io();
             socket.on('callComing',(data)=>{
                 console.log(data);
-                calls.push(data);
+                calls[0]=data;
+                if(confirm('Call incoming.  Click ok to answer.')) {
+                    answer(calls[0]);
+                }
             })
 
             Twilio.Device.on('incoming',(conn)=>{
@@ -36,10 +36,15 @@
             })
 
             function answer(call) {
-                Twilio.Device.audioContext.resume();
                 axios.post('/voice/answer',{id:call.data.CallSid});
+            }
 
-                //Twilio.Device.connect({conference:call.conference});
+            function checkIn() {
+                axios.get('/voice/token')
+                .then((resp)=>{
+                    Twilio.Device.setup(resp.data.token);
+                    document.getElementById('actions').innerHTML = 'You are checked in. Call 385-343-4563';
+                })
             }
         </script>
 
