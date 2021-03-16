@@ -8,10 +8,7 @@ module.exports = function(io) {
 
     const getPublicHomepage = (req, res) => {
 
-        Users.getUsers((err, res) => {
-            if (err) return console.log(err);
-            console.log(res);
-        });
+
 
         res.render('index', {
             appName,
