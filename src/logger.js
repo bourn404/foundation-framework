@@ -25,11 +25,7 @@ const requestLogger = createLogger({
         format.json()
     ),
     transports: [
-        //
-        // - Write all logs with level `error` and below to `error.log`
-        // - Write all logs with level `info` and below to `combined.log`
-        //
-        new transports.File({ filename: path.join(logsDirectory, '/access.log'), level: 'http' }),
+        new transports.File({ filename: path.join(logsDirectory, '/database.log'), level: 'info' }),
     ],
 });
 
@@ -38,6 +34,17 @@ const stream = {
         requestLogger.http(message);
     }
 }
+
+const queryLogger = createLogger({
+    level: 'info',
+    format: format.combine(
+        format.timestamp(),
+        format.json()
+    ),
+    transports: [
+        new transports.File({ filename: path.join(logsDirectory, '/access.log'), level: 'http' }),
+    ],
+});
 
 // special logging rules on non-production environments
 
@@ -56,4 +63,4 @@ if (process.env.NODE_ENV !== 'production') {
     }));
 }
 
-module.exports = { logger, requestLogger, stream };
+module.exports = { logger, requestLogger, stream, queryLogger };
