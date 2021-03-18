@@ -58,6 +58,7 @@ drop table if exists calls cascade;
 create table calls (
 id serial not null primary key
 ,uid varchar(255) not null -- twilio identifier
+,status varchar(25) not null default 'ringing'
 ,from_number varchar(25) not null -- phone number
 ,from_user int references users(id)
 ,to_number varchar(25) not null -- phone number
@@ -65,4 +66,5 @@ id serial not null primary key
 ,duration int not null
 ,notes text
 ,recording varchar(255)
+,created timestamp default CURRENT_TIMESTAMP
 );

@@ -20,6 +20,7 @@
         
         <script>
             let calls = [];
+            let clientIdentity = "";
 
             const socket = io();
             socket.on('callComing',(data)=>{
@@ -36,13 +37,14 @@
             })
 
             function answer(call) {
-                axios.post('/voice/answer',{id:call.data.CallSid});
+                axios.post('/voice/answer',{id:call.data.CallSid, clientIdentity: clientIdentity});
             }
 
             function checkIn() {
                 axios.get('/voice/token')
                 .then((resp)=>{
                     Twilio.Device.setup(resp.data.token);
+                    clientIdentity = resp.data.clientIdentity;
                     document.getElementById('actions').innerHTML = 'You are checked in. Call 385-343-4563';
                 })
             }

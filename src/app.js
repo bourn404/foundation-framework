@@ -2,6 +2,7 @@ require('dotenv').config();
 const path = require('path');
 const express = require('express');
 const hbs = require('hbs');
+const twilio = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 const { logger, stream } = require('./logger');
 const morgan = require('morgan');
 
@@ -47,3 +48,13 @@ server.listen(port, () => {
 io.on('connection', (client) => {
     logger.log({ level: 'http', message: 'Socket connection on port ' + port + '.' });
 });
+
+// Update TWIML app with current site root address
+// In the future when you're not using a trial twilio account, you would probably set up a separate phone number and a separate app for dev purposes
+// This will also cause problems if you have multiple devs, but since it's just me we're alright!
+twilio.applications('AP8782bacb9fb3bad392e37740a7e77292')
+    .update({
+        voiceUrl: process.env.SITE_ROOT + '/voice',
+        statusCallback: process.env.SITE_ROOT + '/voice/status'
+    })
+    .then(application => logger.log({ level: 'debug', message: '"' + application.friendlyName + '" TwiML App updated to ' + process.env.SITE_ROOT }));
