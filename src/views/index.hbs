@@ -7,6 +7,10 @@
     </head>
     <body>
         {{>header}}
+        <div>
+            <h2>Recent Calls</h2>
+            <ul id="recent-calls"></ul>
+        </div>
         <div id="actions">
             <p>Click "Check In" to begin receiving calls.</p>
             <button onclick="checkIn()">Check In</button>
@@ -23,12 +27,16 @@
             let clientIdentity = "";
 
             const socket = io();
-            socket.on('callComing',(data)=>{
+            {{!-- socket.on('callComing',(data)=>{
                 console.log(data);
                 calls[0]=data;
                 if(confirm('Call incoming.  Click ok to answer.')) {
                     answer(calls[0]);
                 }
+            }) --}}
+
+            socket.on('callsUpdate',(data)=>{
+                renderRecentCalls(data.recentCalls);
             })
 
             Twilio.Device.on('incoming',(conn)=>{
@@ -46,8 +54,49 @@
                     Twilio.Device.setup(resp.data.token);
                     clientIdentity = resp.data.clientIdentity;
                     document.getElementById('actions').innerHTML = 'You are checked in. Call 385-343-4563';
+                });
+            }
+
+            function getRecentCalls(callback) {
+                axios.get('/voice/recent')
+                .then((resp)=>{
+                    callback(null,resp.data.recentCalls);
+                });
+            }
+
+            let formatPhoneNumber = (str) => {
+                //Filter only numbers from the input
+                let cleaned = ('' + str).replace(/\D/g, '');
+                
+                //Check if the input is of correct
+                let match = cleaned.match(/^(1|)?(\d{3})(\d{3})(\d{4})$/);
+                
+                if (match) {
+                    //Remove the matched extension code
+                    //Change this to format for any country code.
+                    let intlCode = (match[1] ? '+1 ' : '')
+                    return [intlCode, '(', match[2], ') ', match[3], '-', match[4]].join('')
+                }
+                
+                return null;
+            }
+
+            function renderRecentCalls(calls) {
+                var list = document.getElementById('recent-calls');
+                list.innerHTML = "";
+                calls.forEach((call)=>{
+                    let created = new Date(call.created);
+                    created = new Date(Date.UTC(created.getFullYear(), created.getMonth(), created.getDate(), created.getHours(), created.getMinutes(), created.getSeconds()));
+                    let createdString = created.toLocaleString('en-US', { timeZone: 'America/Denver' })
+                    var newLI = document.createElement('li');
+                    newLI.innerHTML = `${formatPhoneNumber(call.from_number)}</br>${call.status} ${createdString}`;
+                    list.appendChild(newLI);
                 })
             }
+
+            getRecentCalls((err,calls)=>{
+                renderRecentCalls(calls);
+            })
         </script>
 
 

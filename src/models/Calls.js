@@ -6,6 +6,13 @@ const getAll = (callback) => {
     });
 }
 
+const getRecent = (count, callback) => {
+    if (!Number.isInteger(count)) return callback('Invalid paremeter in getRecent', null);
+    db.query('SELECT * FROM calls ORDER BY created DESC LIMIT $1', [count], (error, result) => {
+        callback(error, result);
+    });
+}
+
 const getStatus = (uid, callback) => {
     const sql = "SELECT status FROM calls WHERE uid = $1";
     if (!uid) {
@@ -22,7 +29,7 @@ const getStatus = (uid, callback) => {
 }
 
 const add = ({ uid, fromNumber, fromUser, toNumber, toUser, duration, notes }, callback) => {
-    const sql = "INSERT INTO calls(uid,from_number,from_user,to_number,to_user,duration,notes) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *";
+    const sql = "INSERT INTO calls(uid,from_number,from_user,to_number,to_user,duration,notes) VALUES ($1,$2,$3,$4,$5,$6,$7)";
     const data = [uid || null, fromNumber || null, fromUser || null, toNumber || null, toUser || null, duration || 0, notes || null];
     db.query(sql, data, (error, result) => {
         callback(error, result);
@@ -51,4 +58,4 @@ const updateDuration = ({ uid, duration }, callback) => {
     });
 }
 
-module.exports = { getAll, getStatus, add, updateStatus, updateDuration };
+module.exports = { getAll, getRecent, getStatus, add, updateStatus, updateDuration };

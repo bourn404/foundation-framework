@@ -9,6 +9,7 @@ module.exports = function(io) {
     // base url: /voice
 
     router.post('/', voiceController.handleIncomingCalls);
+    router.get('/recent', voiceController.getRecentCalls);
     router.post('/status', voiceController.callStatusChange);
     router.post('/answer', voiceController.clientAnswerCall);
     router.post('/route/:client', voiceController.routeCallToClient);
