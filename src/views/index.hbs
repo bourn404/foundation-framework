@@ -25,6 +25,7 @@
         <script>
             let calls = [];
             let clientIdentity = "";
+            let device;
 
             const socket = io();
             {{!-- socket.on('callComing',(data)=>{
@@ -51,9 +52,13 @@
             function checkIn() {
                 axios.get('/voice/token')
                 .then((resp)=>{
-                    Twilio.Device.setup(resp.data.token);
+                    const device = new Twilio.Device();
+                    device.setup(resp.data.token);
                     clientIdentity = resp.data.clientIdentity;
                     document.getElementById('actions').innerHTML = 'You are checked in. Call 385-343-4563';
+
+                    console.dir(device);           
+
                 });
             }
 
