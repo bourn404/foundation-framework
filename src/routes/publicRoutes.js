@@ -12,6 +12,9 @@ module.exports = function(io, app) {
     app.use('/js/axios.min.js', (req, res) => {
         res.sendFile(path.join(__dirname, '../../node_modules/axios/dist/axios.min.js'));
     })
+    app.use('/js/axios.min.map', (req, res) => {
+        res.sendFile(path.join(__dirname, '../../node_modules/axios/dist/axios.min.map'));
+    })
 
     const publicController = require('../controllers/publicController.js')(io);
 

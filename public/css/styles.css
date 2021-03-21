@@ -1,0 +1,100 @@
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,700;0,800;1,300;1,400;1,700;1,800&display=swap");
+body {
+  font-family: 'Open Sans', sans-serif;
+  background-color: #e0e0e0;
+  min-height: 100vh;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  color: #333333;
+}
+
+#page-content {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-flex: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -ms-flex-pack: distribute;
+      justify-content: space-around;
+}
+
+.list-box {
+  background-color: #ffffff;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  height: 80vh;
+  width: 300px;
+  max-width: 100%;
+}
+
+.list-box div, .list-box ul {
+  -webkit-box-flex: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+  overflow-y: auto;
+}
+
+.list-box h2 {
+  margin: 0;
+  padding: 0.8rem 1.5rem;
+  background-color: #cccccc;
+}
+
+#recent-calls {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+#recent-calls li {
+  padding: 0.5rem 1.5rem;
+  margin: 0.4rem 0.2rem;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+}
+
+#recent-calls li p {
+  margin: 0;
+}
+
+#recent-calls li .from-number {
+  font-weight: bold;
+}
+
+#recent-calls .call-ringing {
+  color: #856404;
+  background-color: #fff3cd;
+  border-color: #ffeeba;
+}
+
+#recent-calls .call-complete {
+  border-color: #c3e6cb;
+  color: #008000;
+}
+
+#recent-calls .call-missed {
+  background-color: #f8d7da;
+  color: #721c24;
+  border-color: #f5c6cb;
+}
+
+#recent-calls .call-in-progress {
+  color: #0c5460;
+  background-color: #d1ecf1;
+  border-color: #bee5eb;
+}
+/*# sourceMappingURL=styles.css.map */

@@ -11,7 +11,8 @@ module.exports = function(io) {
     router.post('/', voiceController.handleIncomingCalls);
     router.get('/recent', voiceController.getRecentCalls);
     router.post('/status', voiceController.callStatusChange);
-    router.post('/answer', voiceController.clientAnswerCall);
+    router.post('/client/answer', voiceController.clientAnswerCall);
+    router.post('/client/end', voiceController.clientEndCall);
     router.post('/route/:client', voiceController.routeCallToClient);
     router.get('/token', voiceController.generateClientAccessToken)
     router.post('/end', voiceController.endCall);

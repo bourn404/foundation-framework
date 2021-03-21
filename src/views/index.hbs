@@ -7,15 +7,18 @@
     </head>
     <body>
         {{>header}}
-        <div>
-            <h2>Recent Calls</h2>
-            <ul id="recent-calls"></ul>
-        </div>
-        <div id="actions">
-            <p>Click "Check In" to begin receiving calls.</p>
-            <button onclick="checkIn()">Check In</button>
-        </div>
-        <!-- <button onclick="answer(calls[0])">Answer</button> -->
+            <div id="contacts-wrapper" class="list-box">
+                <h2>Contacts</h2>
+                <p>This is a work in progress!  The actual phone numbers of incoming callers are filtered for privacy (last four digits switched to 9999).</p>
+                <p><strong>To initiate a call with the browser, click anywhere on the screen.  Then call 385-343-4563.</strong></p>
+            </div>
+            <div id="recent-calls-wrapper" class="list-box">
+                <h2>Recent Calls</h2>
+                <ul id="recent-calls"></ul>
+            </div>
+            <div id="dialer-wrapper" class="list-box">
+                <h2>Dialer</h2>
+            </div>
         {{>footer}}
 
         <script src="/socket.io/socket.io.js"></script>
@@ -23,9 +26,16 @@
         <script type="text/javascript" src="/js/axios.min.js"></script>
         
         <script>
+            let ringtone = new Audio('/audio/default_tone.mp3');
+            ringtone.loop = true;
+            let callConnect = new Audio('/audio/connected.mp3');
+
+
             let calls = [];
             let clientIdentity = "";
             let device;
+            let checkedIn = false;
+            let callInProgress = false;
 
             const socket = io();
             {{!-- socket.on('callComing',(data)=>{
@@ -40,25 +50,39 @@
                 renderRecentCalls(data.recentCalls);
             })
 
-            Twilio.Device.on('incoming',(conn)=>{
-                console.log('Incoming connection from ' + conn.parameters.From);
-                conn.accept();
-            })
-
-            function answer(call) {
-                axios.post('/voice/answer',{id:call.data.CallSid, clientIdentity: clientIdentity});
+            function answer(CallSid) {
+                ringtone.pause();
+                callInProgress = CallSid;
+                if(checkedIn) {
+                    axios.post('/voice/client/answer',{id:CallSid, clientIdentity: clientIdentity});
+                } else {
+                    checkIn((err, clientId) => {
+                        axios.post('/voice/client/answer',{id:CallSid, clientIdentity: clientId});
+                    })
+                }
             }
 
-            function checkIn() {
+            function hangup(CallSid) {
+                axios.post('/voice/client/end',{id:CallSid, clientIdentity: clientIdentity});
+                callInProgress = false;
+            }
+
+            function checkIn(callback) {
                 axios.get('/voice/token')
                 .then((resp)=>{
                     const device = new Twilio.Device();
-                    device.setup(resp.data.token);
+                    device.setup(resp.data.token, {
+                        sounds: {
+                            incoming: '/audio/silent.mp3',
+                            disconnect: '/audio/disconnected.mp3'
+                        }
+                    });
                     clientIdentity = resp.data.clientIdentity;
-                    document.getElementById('actions').innerHTML = 'You are checked in. Call 385-343-4563';
-
-                    console.dir(device);           
-
+                    device.on('incoming',(conn)=>{
+                        conn.accept();
+                        callConnect.play();
+                    });
+                    callback(null,clientIdentity);
                 });
             }
 
@@ -89,12 +113,36 @@
             function renderRecentCalls(calls) {
                 var list = document.getElementById('recent-calls');
                 list.innerHTML = "";
+                ringtone.pause();
                 calls.forEach((call)=>{
                     let created = new Date(call.created);
                     created = new Date(Date.UTC(created.getFullYear(), created.getMonth(), created.getDate(), created.getHours(), created.getMinutes(), created.getSeconds()));
                     let createdString = created.toLocaleString('en-US', { timeZone: 'America/Denver' })
-                    var newLI = document.createElement('li');
-                    newLI.innerHTML = `${formatPhoneNumber(call.from_number)}</br>${call.status} ${createdString}`;
+                    let newLI = document.createElement('li');
+                    newLI.classList.add('call-'+call.status);
+                    let actions = "";
+                    let statusIcon = "";
+                    switch(call.status) {
+                        case 'ringing':
+                            ringtone.play();
+                            statusIcon = '<i class="fas fa-fw fa-phone-volume status-icon"></i>';
+                            actions = `<a href='#' onclick='answer("${call.uid}")'>Answer</a>`;
+                            break;
+                        case 'in-progress':
+                            statusIcon = '<i class="fas fa-spin fa-fw fa-spinner status-icon"></i>';
+                            if(callInProgress == call.uid) {
+                                actions = `<a href='#' onclick='hangup("${call.uid}")'>Hangup</a>`;
+                            }
+                            break;
+                        case 'complete':
+                            statusIcon = '<i class="fas fa-fw fa-arrow-down status-icon"></i>';
+                            break;
+                        case 'missed': 
+                            statusIcon = '<i class="fas fa-fw fa-arrow-to-bottom status-icon"></i>';
+                            break;
+                    }
+
+                    newLI.innerHTML = `<p class="from-number">${formatPhoneNumber(call.from_number)}</p><p class="call-details">${statusIcon} ${createdString}</p><p>${actions}</p>`;
                     list.appendChild(newLI);
                 })
             }

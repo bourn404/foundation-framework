@@ -1,14 +1,14 @@
 const db = require('./db');
 
 const getAll = (callback) => {
-    db.query('SELECT * FROM calls', [], (error, result) => {
+    db.query('SELECT id, uid, status, duration, notes, recording, created, CONCAT(SUBSTRING(from_number, 1, 8), \'9999\') AS from_number, to_number FROM calls', [], (error, result) => {
         callback(error, result);
     });
 }
 
 const getRecent = (count, callback) => {
     if (!Number.isInteger(count)) return callback('Invalid paremeter in getRecent', null);
-    db.query('SELECT * FROM calls ORDER BY created DESC LIMIT $1', [count], (error, result) => {
+    db.query('SELECT id, uid, status, duration, notes, recording, created, CONCAT(SUBSTRING(from_number, 1, 8), \'9999\') AS from_number, to_number FROM calls ORDER BY created DESC LIMIT $1', [count], (error, result) => {
         callback(error, result);
     });
 }

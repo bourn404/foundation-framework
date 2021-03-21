@@ -10,7 +10,7 @@ const Calls = require('../models/Calls');
 
 module.exports = function(io) {
 
-    const updateRecentCalls = (count = 10) => {
+    const updateRecentCalls = (count = 15) => {
         // Update calls list on admin dashboard
         Calls.getRecent(count, (err, results) => {
             if (err) return logger.log({ level: 'error', message: err });
@@ -101,6 +101,19 @@ module.exports = function(io) {
             });
     }
 
+    const clientEndCall = (req, res) => {
+        logger.log({ level: 'debug', message: '"' + req.body.clientIdentity + '" ended call: ' + req.body.id });
+        twilio.calls(req.body.id)
+            .update({
+                url: process.env.SITE_ROOT + '/voice/end',
+                method: 'POST'
+            }, (err, call) => {
+                if (err) {
+                    logger.log({ level: 'error', message: err })
+                }
+            });
+    }
+
     const routeCallToClient = (req, res) => {
         const twiml = new VoiceResponse();
         twiml.dial().client(req.params.client);
@@ -109,7 +122,7 @@ module.exports = function(io) {
     }
 
     const getRecentCalls = (req, res) => {
-        Calls.getRecent(10, (err, results) => {
+        Calls.getRecent(15, (err, results) => {
             if (err) return logger.log({ level: 'error', message: err });
             res.setHeader('Content-Type', 'application/json');
             res.send(JSON.stringify({ recentCalls: results.rows }));
@@ -143,6 +156,7 @@ module.exports = function(io) {
         callStatusChange,
         endCall,
         clientAnswerCall,
+        clientEndCall,
         routeCallToClient,
         getRecentCalls,
         generateClientAccessToken
