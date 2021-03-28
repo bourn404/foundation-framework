@@ -8,7 +8,8 @@ const getAll = (callback) => {
 
 const getRecent = (count, callback) => {
     if (!Number.isInteger(count)) return callback('Invalid paremeter in getRecent', null);
-    db.query('SELECT id, uid, status, duration, notes, recording, created, CONCAT(SUBSTRING(from_number, 1, 8), \'9999\') AS from_number, to_number FROM calls ORDER BY created DESC LIMIT $1', [count], (error, result) => {
+    let sql = "SELECT calls.id, calls.uid, calls.status, calls.duration, calls.notes, calls.recording, calls.created, CONCAT(SUBSTRING(calls.from_number, 1, 8), '9999') AS from_number, to_number, users.id as from_user, CONCAT(users.firstname, ' ', users.lastname) as from_name FROM calls LEFT JOIN users on users.phone = calls.from_number ORDER BY created DESC LIMIT $1"
+    db.query(sql, [count], (error, result) => {
         callback(error, result);
     });
 }

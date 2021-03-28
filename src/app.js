@@ -35,7 +35,9 @@ hbs.registerPartials(partialsPath);
 // Routes 
 logger.log({ level: 'debug', message: 'Setting up routes.' });
 const voiceRoutes = require('./routes/voiceRoutes');
+const contactRoutes = require('./routes/contactRoutes');
 const publicRoutes = require('./routes/publicRoutes');
+app.use("/contact", contactRoutes(io));
 app.use("/voice", voiceRoutes(io));
 app.use("/", publicRoutes(io, app));
 

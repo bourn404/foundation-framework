@@ -75,3 +75,12 @@ body {
         border-color: #bee5eb;
     }
 }
+
+label, input[type=submit] {
+    display: block;
+    margin-top: 10px;
+}
+
+.hidden {
+    display: none;
+}

@@ -9,7 +9,16 @@
         {{>header}}
             <div id="contacts-wrapper" class="list-box">
                 <h2>Contacts</h2>
-                <p>This is a work in progress!  The actual phone numbers of incoming callers are filtered for privacy (last four digits switched to 9999).</p>
+                <p><a id="contact-add" href="/contacts/add">Add New +</a></p>
+                <form id="contact-add-form" class="hidden">
+                    <label for="firstname">First Name</label>
+                    <input type="text" name="firstname" id="firstname" required />
+                    <label for="lastname">Last Name</label>
+                    <input type="text" name="lastname" id="lastname" required />
+                    <label for="phone">Phone Number</label>
+                    <input type="text" name="phone" id="phone" required placeholder="+1 999-999-9999" />
+                    <input type="submit" value="Save">
+                </form>
                 <p><strong>To initiate a call with the browser, click anywhere on the screen.  Then call 385-343-4563.</strong></p>
             </div>
             <div id="recent-calls-wrapper" class="list-box">
@@ -26,6 +35,39 @@
         <script type="text/javascript" src="/js/axios.min.js"></script>
         
         <script>
+            let addContactButton = document.getElementById("contact-add");
+            let addContactForm = document.getElementById("contact-add-form");
+            let firstnameField = document.getElementById("firstname");
+            let lastnameField = document.getElementById("lastname");
+            let phoneField = document.getElementById("phone");
+
+            function addContact(firstname, lastname, phone, callback) {
+                axios.post('/contact/add',{firstname,lastname,phone})
+                .then((resp)=>{
+                    callback(null,resp);
+                });
+            }
+
+            function showFormAddContact() {
+                // clear form fields
+                addContactForm.reset();
+                addContactForm.classList.remove('hidden');
+            }
+
+            addContactButton.addEventListener('click',(e)=>{
+                e.preventDefault();
+                console.log('Add Contact');
+                showFormAddContact();
+            })
+
+            addContactForm.addEventListener('submit',(e)=>{
+                e.preventDefault();
+                addContact(firstnameField.value,lastnameField.value,phoneField.value,(err,resp)=>{
+                    console.dir(resp);
+                });
+            })
+
+            // TWILIO Calls
             let ringtone = new Audio('/audio/default_tone.mp3');
             ringtone.loop = true;
             let callConnect = new Audio('/audio/connected.mp3');
@@ -142,7 +184,12 @@
                             break;
                     }
 
-                    newLI.innerHTML = `<p class="from-number">${formatPhoneNumber(call.from_number)}</p><p class="call-details">${statusIcon} ${createdString}</p><p>${actions}</p>`;
+                    let from = formatPhoneNumber(call.from_number)
+                    if(call.from_user) {
+                        from = call.from_name;
+                    } 
+
+                    newLI.innerHTML = `<p class="from-number">${from}</p><p class="call-details">${statusIcon} ${createdString}</p><p>${actions}</p>`;
                     list.appendChild(newLI);
                 })
             }
