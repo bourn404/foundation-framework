@@ -64,6 +64,9 @@
                 e.preventDefault();
                 addContact(firstnameField.value,lastnameField.value,phoneField.value,(err,resp)=>{
                     console.dir(resp);
+                    getRecentCalls((err,calls)=>{
+                        renderRecentCalls(calls);
+                    })
                 });
             })
 
